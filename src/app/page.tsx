@@ -1,101 +1,98 @@
-import Image from "next/image";
+"use client";
+
+import React, { useEffect, useState } from "react";
+import NovaConta from "./components/NovaConta/NovaConta";
+import CreditoDebito from "./components/CreditoDebito/CreditoDebito";
+import Transferencia from "./components/Transferencia/Transferencia";
+import Saldo from "./components/Saldo/Saldo";
+import Transacoes from "./components/Transacoes/Transacoes";
+import "./globals.css";
+import { ContasContext } from "./contexts/ContasContext";
+import { IContaBancaria } from "./interface/IContaBancaria";
+import { listarContasService } from "./service/service";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [activeComponent, setActiveComponent] = useState("account-section");
+  const [contas, setContas] = useState<IContaBancaria[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const setItems = (newItems: IContaBancaria[]) => {
+    setContas(newItems);
+  };
+
+  const addItem = (conta: IContaBancaria) => {
+    setContas([...contas, conta]);
+  };
+
+  const removeItem = (id: number) => {
+    setContas(contas.filter((conta) => conta.id !== id));
+  };
+
+  useEffect(() => {
+    atualizarContas();
+  }, []);
+
+  const atualizarContas = async () => {
+    const contas = await listarContasService();
+    if (Array.isArray(contas)) setItems(contas);
+  };
+
+  const renderComponent = () => {
+    switch (activeComponent) {
+      case "account-section":
+        return <NovaConta />;
+      case "transaction-section":
+        return <CreditoDebito />;
+      case "balance-section":
+        return <Saldo />;
+      case "history-section":
+        return <Transacoes />;
+      case "transfer-section":
+        return <Transferencia />;
+      default:
+        return <NovaConta />;
+    }
+  };
+
+  return (
+    <ContasContext.Provider value={{ contas, setItems, addItem, removeItem }}>
+      <div className="container">
+        <header>
+          <h1>Gerenciamento de Contas Bancárias</h1>
+        </header>
+        <nav>
+          <button
+            className="tab-button"
+            onClick={() => setActiveComponent("account-section")}
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Criar Conta
+          </button>
+          <button
+            className="tab-button"
+            onClick={() => setActiveComponent("balance-section")}
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            Consultar Saldo
+          </button>
+          <button
+            className="tab-button"
+            onClick={() => setActiveComponent("history-section")}
+          >
+            Histórico
+          </button>
+          <button
+            className="tab-button"
+            onClick={() => setActiveComponent("transaction-section")}
+          >
+            Crédito/Débito
+          </button>
+          <button
+            className="tab-button"
+            onClick={() => setActiveComponent("transfer-section")}
+          >
+            Transferência
+          </button>
+        </nav>
+        <main>{renderComponent()}</main>
+      </div>
+    </ContasContext.Provider>
   );
 }
